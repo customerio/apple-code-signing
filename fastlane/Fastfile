@@ -1,0 +1,43 @@
+require 'tempfile'
+require "base64"
+
+platform :ios do  
+
+  before_all do |lane, options|    
+    if ENV['CI'] 
+      setup_ci # required for getting code signing to work. creates a temporary keychain file on server 
+    end 
+  end
+
+  # Code signing certificates expire once a year. When they expire, you must re-create a new certificates and then re-create 
+  # all provisioning profiles because the profiles used the old certificate. 
+  # This function will delete all certificates used by all of our iOS apps. Only run this function when the cerficates are about 
+  # to expire, or maybe you decide to run this function because you encountered a problem with the apple developer account 
+  # and you decided to start over on code signing. 
+  lane :delete_all_code_signing_files do |values|
+    disable_dry_run = values[:disable_dry_run] == "true"
+    run_match_readonly = !disable_dry_run
+
+    # authenticate with Apple developer account via App Store Connect API 
+    app_store_connect_api_key(
+      key_content: ENV["APP_STORE_CONNECT_API_KEY_CONTENT_B64"],
+      is_key_content_base64: true
+    )
+
+    # Authenticate with Google Cloud account to have read/write access to file storage bucket where code signing files exist
+    google_cloud_auth_file = TempFile.new('gc_keys.json')
+    google_cloud_auth_file.write(Base64.decode64(ENV["GOOGLE_CLOUD_AUTH_FILE_CONTENTS_B64"]))
+    google_cloud_keys_file_path = google_cloud_auth_file.path 
+
+    match_nuke(
+      type: 'development',
+      readonly: run_match_readonly,
+      google_cloud_keys_file: google_cloud_keys_file_path
+    )
+    match_nuke(
+      type: 'adhoc',
+      readonly: run_match_readonly,
+      google_cloud_keys_file: google_cloud_keys_file_path
+    )
+  end 
+end 

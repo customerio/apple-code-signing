@@ -1,0 +1,97 @@
+# This workflow's job is to delete code signing files for all of the iOS apps we have in the company. 
+# There are some scenarios when you might need to delete all code signing files and start over:
+# 1. Code signing certificate is expired or about to expire. For certificates, you need to delete *all* code signing files and re-create all new files for all apps. 
+# 2. Your company's Apple developer account is messy and has many un-used code signing files in it. By deleting all code signing files and re-creating them, it's a clean start. 
+name: Delete code signing files 
+
+on:
+  workflow_dispatch: # allow running this manually if you encounter major code signing files and it's easiest to just start over. 
+    inputs:
+      disable_dry_run: # By default, running this workflow is not destructive. Hopefully preventing accidents. 
+        description: "Warning: This is a destructive operation and makes all our iOS apps fail to build (until each app re-creates their code signing files). I am going to assume you have a reason to run this. If so, set this option to 'true' and continue."
+        default: false
+        type: boolean
+        required: true 
+
+  schedule: # automatically run this workflow periodically to delete code signing files before they expire. Allows us to prepare for expiration. 
+    - cron: '0 0 1 */6 *' # Run at midnight on Jan 1st and July 1st - https://cron.help/#0_0_1_*/6_*
+
+# Secrets required on github repository to run this workflow 
+env:
+  # Authentication file (google cloud service account) used to read/write to a Google Cloud storage bucket where code signing files are stored. 
+  # Run 'cat gc_keys.json | base64' to get a base64 encoded version of the google service account file. This generated string is the value for the secret to set. 
+  # Learn more about gc_keys.json here: https://docs.fastlane.tools/actions/match/
+  GOOGLE_CLOUD_AUTH_FILE_CONTENTS_B64: ${{ secrets.GOOGLE_CLOUD_AUTH_FILE_CONTENTS_B64 }}
+  # Authentication file to App Store Connect API to give server access to Apple Developer account. 
+  # Run 'cat app_store_connect_creds.json | base64' to get a base64 encoded version of the apple api creds file. This generated string is the value for the secret to set. 
+  # Learn more about file: https://docs.fastlane.tools/app-store-connect-api/
+  APP_STORE_CONNECT_API_KEY_CONTENT_B64: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT_B64 }}
+  # Incoming webhook URL that sends message into the correct Slack channel.
+  # Help on how to get the webhook URL: https://github.com/marketplace/actions/slack-send#setup-2
+  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_NOTIFY_WEBHOOK_URL }}
+
+jobs:
+  delete_code_signing_certificates:
+    name: Delete iOS code signing certificates to prepare for them expiring soon 
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install Fastlane used for managing code signing files 
+      run: gem install fastlane
+        
+    - name: Delete code signing files for all iOS apps 
+      # runs function inside of fastlane/Fastfile
+      # if this workflow runs via schedule then inputs is null. Disable dry run on schedule. 
+      run: fastlane ios delete_all_code_signing_files disable_dry_run:${{ inputs.disable_dry_run || true }}
+
+    # Note: In future, we can send a request to each of the mobile SDKs in the org to have them all re-create code signing files for each iOS app in the SDK code base. This fully automated the re-creating of code signing files for us. 
+    # Creating of code signing files via CI server on SDK code bases is not yet done. Once it is, we can add that feature. 
+
+    - name: Notify team code signing files have been deleted and what to do next 
+      uses: slackapi/slack-github-action@v1.18.0
+      with:
+        # Use block kit for format of the JSON payloads: https://app.slack.com/block-kit-builder
+        payload: |
+          {
+            "text": "Maintenance success notice",
+            "username": "Code signing maintenance bot",
+            "icon_url": "https://emojiguide.org/images/emoji/1/8z8e40kucdd1.png",
+            "channel": "#team-mobile",
+            "blocks": [
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "🟩 Attention: 🟩\n\nAs part of iOS code signing maintenance, all of the code signing certificates for all of the iOS apps in the company have been deleted. This was planned as code signing certificates expire and periodically need to be deleted.\n\nBecause of this event, all iOS apps need to have their code signing files re-created. See our document on code signing to learn how to do that: https://github.com/customerio/mobile/blob/main/ios_code_signing.md"
+                }
+              }
+            ]
+          }
+      env:
+        SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
+    - name: Notify team deleting certificates failed. Fix issue so we can get certificates deleted before expiring. 
+      uses: slackapi/slack-github-action@v1.18.0
+      if: ${{ failure() }} # only run this if any previous step failed
+      with:
+        # Use block kit for format of the JSON payloads: https://app.slack.com/block-kit-builder
+        payload: |
+          {
+            "text": "Maintenance error notice",
+            "username": "Code signing maintenance bot",
+            "icon_url": "https://emojiguide.org/images/emoji/1/8z8e40kucdd1.png",
+            "channel": "#team-mobile",
+            "blocks": [
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "🟥 Attention 🟥:\n\nAs part of iOS code signing maintenance, *I attempted but failed* to delete the code signing certificates for all of the iOS apps in the company. This was planned as code signing certificates expire and periodically need to be deleted.\n\nIt's suggested you fix this failure before the code signing certificates expire and iOS app builds fail. See our document on code signing to learn how to delete code signing certificates: https://github.com/customerio/mobile/blob/main/ios_code_signing.md"
+                }
+              }
+            ]
+          }
+      env:
+        SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
