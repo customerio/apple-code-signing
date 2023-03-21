@@ -1,0 +1,20 @@
+# This workflow is meant to be a non-maintenance way to sync code signing files for all apps in the company. 
+# Run this after creating a new iOS app to create code signing files for the app, for example. 
+name: Create iOS code signing files 
+
+on: 
+  workflow_dispatch: # manually run the action from GitHub website
+
+jobs:
+  create-code-signing-files:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install Fastlane used for managing code signing files 
+      run: gem install fastlane
+        
+    - name: Create code signing files for all iOS apps 
+      # runs function inside of fastlane/Fastfile      
+      run: fastlane create_all_code_signing_files
+    
