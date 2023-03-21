@@ -2,17 +2,10 @@
 # There are some scenarios when you might need to delete all code signing files and start over:
 # 1. Code signing certificate is expired or about to expire. For certificates, you need to delete *all* code signing files and re-create all new files for all apps. 
 # 2. Your company's Apple developer account is messy and has many un-used code signing files in it. By deleting all code signing files and re-creating them, it's a clean start. 
-name: Delete code signing files 
+name: iOS code signing maintenance 
 
 on:
   workflow_dispatch: # allow running this manually if you encounter major code signing files and it's easiest to just start over. 
-    inputs:
-      disable_dry_run: # By default, running this workflow is not destructive. Hopefully preventing accidents. 
-        description: "Warning: This is a destructive operation and makes all our iOS apps fail to build (until each app re-creates their code signing files). I am going to assume you have a reason to run this. If so, set this option to 'true' and continue."
-        default: false
-        type: boolean
-        required: true 
-
   schedule: # automatically run this workflow periodically to delete code signing files before they expire. Allows us to prepare for expiration. 
     - cron: '0 0 1 */6 *' # Run at midnight on Jan 1st and July 1st - https://cron.help/#0_0_1_*/6_*
 
@@ -41,14 +34,15 @@ jobs:
       run: gem install fastlane
         
     - name: Delete code signing files for all iOS apps 
-      # runs function inside of fastlane/Fastfile
-      # if this workflow runs via schedule then inputs is null. Disable dry run on schedule. 
-      run: fastlane ios delete_all_code_signing_files disable_dry_run:${{ inputs.disable_dry_run || true }}
+      run: fastlane delete_all_code_signing_files 
+
+    - name: Create code signing files for all iOS apps since they got deleted 
+      run: fastlane create_all_code_signing_files
 
     # Note: In future, we can send a request to each of the mobile SDKs in the org to have them all re-create code signing files for each iOS app in the SDK code base. This fully automated the re-creating of code signing files for us. 
     # Creating of code signing files via CI server on SDK code bases is not yet done. Once it is, we can add that feature. 
 
-    - name: Notify team code signing files have been deleted and what to do next 
+    - name: Notify team about schedule maintenance 
       uses: slackapi/slack-github-action@v1.18.0
       with:
         # Use block kit for format of the JSON payloads: https://app.slack.com/block-kit-builder
@@ -63,7 +57,7 @@ jobs:
                 "type": "section",
                 "text": {
                   "type": "mrkdwn",
-                  "text": "🟩 Attention: 🟩\n\nAs part of iOS code signing maintenance, all of the code signing certificates for all of the iOS apps in the company have been deleted. This was planned as code signing certificates expire and periodically need to be deleted.\n\nBecause of this event, all iOS apps need to have their code signing files re-created. See our document on code signing to learn how to do that: https://github.com/customerio/mobile/blob/main/ios_code_signing.md"
+                  "text": "🟩 Attention: 🟩\n\nAs part of scheduled iOS code signing maintenance, all of the code signing certificates for all of the iOS apps in the company have been deleted and re-created. Code signing certificates expire and periodically need to be re-created.\n\nYou will need to download the new code signing files to your computer if you want to compile an iOS app on your development machine. Read documentation to learn more about development code signing: https://github.com/customerio/apple-code-signing"
                 }
               }
             ]
@@ -87,7 +81,7 @@ jobs:
                 "type": "section",
                 "text": {
                   "type": "mrkdwn",
-                  "text": "🟥 Attention 🟥:\n\nAs part of iOS code signing maintenance, *I attempted but failed* to delete the code signing certificates for all of the iOS apps in the company. This was planned as code signing certificates expire and periodically need to be deleted.\n\nIt's suggested you fix this failure before the code signing certificates expire and iOS app builds fail. See our document on code signing to learn how to delete code signing certificates: https://github.com/customerio/mobile/blob/main/ios_code_signing.md"
+                  "text": "🟥 Attention 🟥:\n\nAs part of iOS code signing maintenance, *I attempted but failed* to re-create the code signing certificates for all of the iOS apps in the company. This was planned as code signing certificates expire and periodically need to be deleted.\n\nIt's suggested you fix this failure before the code signing certificates expire and iOS app builds fail. View CI server logs and documentation in the code signing project to learn more: https://github.com/customerio/apple-code-signing"
                 }
               }
             ]
