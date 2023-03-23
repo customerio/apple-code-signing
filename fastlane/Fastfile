@@ -93,6 +93,40 @@ lane :create_code_signing_files_for_app do |values|
   }
 end 
 
+lane :download_development_code_signing do |values|
+  if ENV["CI"] 
+    UI.user_error!("This lane is meant to only be used for setting up the development environment of an engineer, not setup the CI server credentials")
+  end 
+
+  UI.message("Checking if you're logged into your @customer.io google account on your computer....")
+  is_developer_logged_into_google_account = system("gcloud auth application-default print-access-token")    
+  if !is_developer_logged_into_google_account 
+    error_message = 'In order to download the code signing files, you need to be logged into your @customer.io Google account on your computer. \n'\
+                    'Follow the steps for development code signing setup in the README docs: https://github.com/customerio/apple-code-signing'
+
+    UI.user_error!(error_message)
+  end 
+  
+  sync_code_signing(
+    type: "development",
+    readonly: true,
+    skip_google_cloud_account_confirmation: true,
+    team_id: apple_team_id,
+    storage_mode: sync_code_signing_storage_mode,
+    google_cloud_bucket_name: sync_code_signing_google_cloud_bucket_name,
+    google_cloud_project_id: "remote-habits"
+  )
+  sync_code_signing(
+    type: "adhoc",
+    readonly: true,
+    skip_google_cloud_account_confirmation: true,
+    team_id: apple_team_id,
+    storage_mode: sync_code_signing_storage_mode,
+    google_cloud_bucket_name: sync_code_signing_google_cloud_bucket_name,
+    google_cloud_project_id: "remote-habits"
+  )
+end 
+
 lane :setup_apple_account_write_access do 
   # authenticate with Apple developer account via App Store Connect API 
   # function allows passing in a base64 encoded string. Makes setup easier as you just need to set an (secret) environment variable to authenticate. 
@@ -137,5 +171,4 @@ lane :setup_google_bucket_write_access do
   File.open(gc_keys_file_location, 'w') { |file| file.write(Base64.decode64(base64encoded_gc_keys_file)) }  
 
   google_cloud_keys_file_path = gc_keys_file_location
-
 end 

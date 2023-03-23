@@ -8,7 +8,7 @@ This project does 2 things: It creates new code signing files for new apps and i
 
 The following sections goes into each of these tasks in more detail. 
 
-## Creating a new iOS app? 
+## Creating a new iOS app
 
 All iOS apps need to be registered with Apple through an [Apple Developer account](https://developer.apple.com/account/). You should have an Apple Developer account already with your `@customer.io` email address. With that account, let's go through the steps to create a new iOS app. 
 
@@ -49,6 +49,44 @@ For provisioning profiles, these are easy to handle when they expire because re-
 Certificates, however, are more impactful because *all* provisioning profiles for *all* Apple apps are created from 1 certificate. When you delete a certificate, you also need to re-create all provisioning profiles for every all Apple apps you have. 
 
 This project is setup to automatically delete code signing certificates before they expire to avoid downtime in building iOS apps. See `./.github/workflows/delete-code-signing-files.yml` for this logic. 
+
+# Development code signing 
+
+Want to compile iOS apps on your local development machine? This section goes over the details on how to do that. 
+
+> Note: Code signing files for the app that you want to compile should already be created, you just need to download these files to your computer. If you're developing a *new* iOS app, follow the instructions in this doc for [Creating a new iOS app](#creating-a-new-ios-app). 
+
+Code signing files are store in a Google Cloud Storage bucket to allow convenient access to the files by our team. To download these files, follow these instructions. 
+
+* Install the Google Cloud CLI to your computer using `brew install --cask google-cloud-sdk`. 
+
+*Note:* After running this command, follow the instructions [on this webpage](https://formulae.brew.sh/cask/google-cloud-sdk#default) to add the CLI to your PATH. Without doing this step, your computer will not be able to find the `gcloud` command. 
+
+* Run `gcloud auth application-default login` > a webpage should open asking you to login with your `@customer.io` Google account > After you login on the webpage, you should see a webpage message saying "You are now authenticated with the gcloud CLI!"
+
+* Run `gcloud auth application-default print-access-token` as a way to check that you have successfully logged in. You should see a long string get printed out to the console and not see any error messages. This means that you have successfully logged into your `@customer.io` Google account on your development machine. 
+
+* In the root directory of your iOS project (where your Xcode project exists), run `fastlane download_development_code_signing`. This command should not ask you any questions or give you any errors. 
+
+You should see the message `All required keys, certificates and provisioning profiles are installed 🙌` appear which means that you successfully downloaded the code signing files to your machine!
+
+**If you get an error** `Could not find 'download_development_code_signing'`, add this to the file `fastlane/Fastfile` in your iOS project:
+
+```
+# Import reusable functions that can used by all iOS apps in the team 
+# https://docs.fastlane.tools/actions/import_from_git/
+import_from_git(
+  url: "git@github.com:customerio/apple-code-signing.git", 
+  branch: "main", 
+  path: "fastlane/Fastfile"
+)
+```
+
+**If you get an error** `fastlane command not found`, install the Fastlane CLI with `gem install fastlane`. 
+
+* Open your iOS app in Xcode. The code signing settings for your Xcode project should already be configured to use the code signing files that you just downloaded. You should be able to compile your iOS app right now! 
+
+If you encounter code signing errors while trying to compile your app, view the section [Creating a new iOS app](#creating-a-new-ios-app) about how to modify your Xcode project settings to select the Debug and Release code signing provisioning profiles. 
 
 # CI setup 
 
