@@ -2,9 +2,45 @@
 
 Automating code signing maintenance for all of our iOS apps at Customer.io 
 
-# Features 
+# How to use 
 
-## Automating code signing certificates expiring 
+This project does 2 things: It creates new code signing files for new apps and it performs scheduled maintenance of all code signing files for all iOS apps for the entire company. 
+
+The following sections goes into each of these tasks in more detail. 
+
+## Creating a new iOS app? 
+
+All iOS apps need to be registered with Apple through an [Apple Developer account](https://developer.apple.com/account/). You should have an Apple Developer account already with your `@customer.io` email address. With that account, let's go through the steps to create a new iOS app. 
+
+* **Register a new App ID** 
+
+Following [these instructions](https://developer.apple.com/help/account/manage-identifiers/register-an-app-id), create a new app in the company's Apple Developer account for this new iOS app. 
+
+For the bundle ID, have it start with `io.customer`. Make sure that this new bundle ID is unique not sharing the same bundle ID as any other bundle ID in the company's Apple Developer account. View [the list of bundle IDs](https://developer.apple.com/account/resources/identifiers/list) for ideas and to make sure the new bundle ID is unique. 
+
+When asked about making a *Wildcard App ID*, do not select it. All app IDs should not be a wildcard as wildcards do not allow some features to be added to an iOS app. 
+
+When asked about what capabilities to add, you can select the *Push notifications* checkbox since your app will probably be using push notifications. You can keep all other checkboxes unchecked for now. You can modify capabilities at anytime for existing apps. 
+
+* **Create code signing files for the new App ID**
+
+This project is setup with a CI server that creates code signing files for all iOS apps in the company's Apple Developer account. [Go to this webpage](https://github.com/customerio/apple-code-signing/actions/workflows/create-code-signing-files.yml) and run the workflow. The script will see the new app id that you created and will create code signing files for the new app. 
+
+* **Download the newly created code signing files to your development machine**
+
+TODO. I need to test this out without gc_keys.json file 
+
+* **Open your new iOS app in Xcode**
+
+Follow the instructions in this screenshot to select the correct code signing files for this app: 
+
+![](img/xcode_disable_auto_signing.png)
+
+After you change these settings, you should not see any errors in Xcode:
+
+![](img/check_errors_signing_xcode.png)
+
+## Maintenance of code signing files 
 
 Code signing Apple apps consists of 2 types of files: certificates and provisioning profiles. Both of these files have an expiration date and they need to be deleted and re-created. 
 
