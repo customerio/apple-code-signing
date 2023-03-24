@@ -48,16 +48,14 @@ lane :delete_all_code_signing_files do |values|
   )
 end
 
-# Assumes your project already has an Appfile defining all app identifiers to create code signing files for. 
-# Meant to be called by a iOS app project. 
-lane :create_code_signing_files_for_app do |values|
+lane :create_all_code_signing_files do |values|
   # We need to create code signing files in apple developer account and google cloud bucket. 
   # authenticate with both services. 
   setup_apple_account_write_access
   setup_google_bucket_write_access
 
-  # Fetch all bundle identifiers. Remove (via select() function), the Wildcard app if there is one. 
-  # Wildcard app (bundle identier = *), we currently do not use and may cause issues creating adhoc code signing files for it. 
+  # Fetch all bundle identifiers. Remove, the Wildcard app if there is one. 
+  # Wildcard app (bundle identier = *), we currently do not use because wildcard apps do not support all app capabilites we may use in an iOS app. 
   bundle_identifiers_to_create_files_for = Spaceship::ConnectAPI::BundleId.all.select{ |app| app.identifier != "*"}
 
   UI.important("Received #{bundle_identifiers_to_create_files_for.count} apps from Apple developer account. Now, we will go through each app and confirm code signing files have been created.")
@@ -166,6 +164,8 @@ lane :setup_google_bucket_write_access do
   random_string = SecureRandom.hex
   random_directory_save_gckeys_file = "/tmp/#{random_string}/"
   gc_keys_file_location = "#{random_directory_save_gckeys_file}gc_keys.json"
+
+  UI.message("gc_keys.json file for storage auth stored at: #{gc_keys_file_location}")
 
   FileUtils.mkdir_p(random_directory_save_gckeys_file)
   File.open(gc_keys_file_location, 'w') { |file| file.write(Base64.decode64(base64encoded_gc_keys_file)) }  

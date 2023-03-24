@@ -62,3 +62,8 @@ The key for the secret is `APP_STORE_CONNECT_API_KEY_CONTENT_B64`.
 Get the value for the secret from running this command: `cat /tmp/apple_api_credentials.json | base64`
 
 ### Authenticate with Slack to sending messages on code signing maintenance 
+
+[Create a secret for GitHub Actions in the GitHub repository](https://docs.github.com/en/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-a-repository). 
+
+The key for the secret is `SLACK_NOTIFY_WEBHOOK_URL`. 
+Get the value from 1Password "Mobile squad Slack incoming webhook URL". 
