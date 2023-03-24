@@ -9,18 +9,11 @@ on:
   schedule: # automatically run this workflow periodically to delete code signing files before they expire. Allows us to prepare for expiration. 
     - cron: '0 0 1 */6 *' # Run at midnight on Jan 1st and July 1st - https://cron.help/#0_0_1_*/6_*
 
-# Secrets required on github repository to run this workflow 
-env:
-  # Authentication file (google cloud service account) used to read/write to a Google Cloud storage bucket where code signing files are stored. 
-  # Run 'cat gc_keys.json | base64' to get a base64 encoded version of the google service account file. This generated string is the value for the secret to set. 
-  # Learn more about gc_keys.json here: https://docs.fastlane.tools/actions/match/
-  GOOGLE_CLOUD_AUTH_FILE_CONTENTS_B64: ${{ secrets.GOOGLE_CLOUD_AUTH_FILE_CONTENTS_B64 }}
-  # Authentication file to App Store Connect API to give server access to Apple Developer account. 
-  # Run 'cat app_store_connect_creds.json | base64' to get a base64 encoded version of the apple api creds file. This generated string is the value for the secret to set. 
-  # Learn more about file: https://docs.fastlane.tools/app-store-connect-api/
+# Secrets required on github repository to run this workflow. 
+# View CI_SETUP.md doc on how to find the values for these secrets. 
+env:  
+  GOOGLE_CLOUD_AUTH_FILE_CONTENTS_B64: ${{ secrets.GOOGLE_CLOUD_AUTH_FILE_CONTENTS_B64 }}  
   APP_STORE_CONNECT_API_KEY_CONTENT_B64: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT_B64 }}
-  # Incoming webhook URL that sends message into the correct Slack channel.
-  # Help on how to get the webhook URL: https://github.com/marketplace/actions/slack-send#setup-2
   SLACK_WEBHOOK_URL: ${{ secrets.SLACK_NOTIFY_WEBHOOK_URL }}
 
 jobs:
