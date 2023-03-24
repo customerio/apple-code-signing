@@ -141,7 +141,8 @@ lane :setup_apple_account_write_access do
   app_store_connect_api_key(
     key_id: app_store_connect_api_key_json["key_id"],
     issuer_id: app_store_connect_api_key_json["issuer_id"],
-    key_content: app_store_connect_api_key_json["key"]
+    key_content: app_store_connect_api_key_json["key"],
+    is_key_content_base64: true
   )
 
   # Spaceship allows us to call the app store connect API in an easy way. We authenticate it so we can use it elsewhere in our file. 
