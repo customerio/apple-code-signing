@@ -33,7 +33,7 @@ How the CI server will authenticate with your Apple Developer Account to delete 
 
 For Customer.io employees, this API key may have already been created that you can reference. Otherwise, follow [these docs](https://docs.fastlane.tools/app-store-connect-api/) for instructions on how to create this API key. 
 
-Once you create this API key, Apple will not show it to you again. Security save the key id, issuer id, and key that Apple generated for you. You will be referencing all of this information later. 
+Once you create this API key, Apple will not show it to you again. Security save the key id, issuer id, and key (p8 file) that Apple generated for you. You will be referencing all of this information later. 
 
 * **Create a JSON file that contains this new API key**
 
@@ -50,9 +50,11 @@ Follow [these docs](https://docs.fastlane.tools/app-store-connect-api/) for inst
 
 `in_house` is `true` if [you have an Enterprise Apple Developer Account](https://stackoverflow.com/a/39741405). Otherwise, set to `false`. 
 
-`key_id`, `issuer_id`, and `key` are all values that were given to you when you created an API key in the previous step. For `key` value, you will take the contents of the `.p8` file and replace all newlines with a newline character (`\n`) until the `.p8` file contents are a 1 line string. 
+`key_id`, `issuer_id`, and `key` are all values that were given to you when you created an API key in the previous step. `key_id` and `issuer_id` values are simply the values that Apple gave you directly. 
 
-Let's say that you saved this `.json` file to `/tmp/apple_api_credentials.json` on your computer. You will use this file in the next steps. 
+For `key` value, you need the `.p8` file downloaded to your computer that Apple gave you when you created the API key. Let's say that you have the `.p8` file saved to the location: `/tmp/apple_key.p8` on your computer. Run `cat /tmp/apple_key.p8 | base64` to get a base64 encoded string of the `.p8` file contents. This string that gets printed in your terminal is the value of `key` in the `.json` file. 
+
+Now that you have populated all of the fields of the `.json` file, there is one last step. Let's say that you saved this `.json` file to `/tmp/apple_api_credentials.json` on your computer. You will use this file in the next steps. 
 
 * **Set secret in GitHub**
 
