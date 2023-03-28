@@ -138,16 +138,14 @@ lane :setup_apple_account_write_access do
   app_store_connect_api_key_json = JSON.parse(Base64.decode64(base64encoded_app_store_connect_json_file))
 
   # Running this, all other fastlane actions are now authenticated with the API and works. 
+  # This includes fastlane Spaceship allowing us to easily perform API calls to our Apple Developer account. 
+  # https://github.com/fastlane/fastlane/blob/master/spaceship/docs/AppStoreConnect.md
   app_store_connect_api_key(
     key_id: app_store_connect_api_key_json["key_id"],
     issuer_id: app_store_connect_api_key_json["issuer_id"],
-    key_content: app_store_connect_api_key_json["key"]
+    key_content: app_store_connect_api_key_json["key"],
+    is_key_content_base64: true
   )
-
-  # Spaceship allows us to call the app store connect API in an easy way. We authenticate it so we can use it elsewhere in our file. 
-  apple_app_store_account_api_key = lane_context[SharedValues::APP_STORE_CONNECT_API_KEY]
-  token = Spaceship::ConnectAPI::Token.create(apple_app_store_account_api_key)  
-  Spaceship::ConnectAPI.token = token
 end 
 
 lane :setup_google_bucket_write_access do
