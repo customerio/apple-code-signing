@@ -19,10 +19,32 @@ on:
         required: true
         type: string
 
+# Secrets required on github repository to run this workflow. 
+# View CI_SETUP.md doc on how to find the values for these secrets. 
+env:
+  GOOGLE_CLOUD_AUTH_FILE_CONTENTS_B64: ${{ secrets.GOOGLE_CLOUD_AUTH_FILE_CONTENTS_B64 }}  
+  APP_STORE_CONNECT_API_KEY_CONTENT_B64: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT_B64 }}
+
 jobs:
   register-new-device:
     runs-on: macos-latest
     steps:
+    # To try and keep inputs hidden from CI logs. 
+    # help from: https://github.com/actions/runner/issues/643#issuecomment-823537871
+    - name: Create secret environment variables from inputs 
+      run: |
+        IOS_DEVICE_UDID=$(jq -r '.inputs.ios_device_udid' $GITHUB_EVENT_PATH)
+        echo ::add-mask::$IOS_DEVICE_UDID
+        echo IOS_DEVICE_UDID="$IOS_DEVICE_UDID" >> $GITHUB_ENV
+
+        DEVICE_MODEL_NAME=$(jq -r '.inputs.device_model_name' $GITHUB_EVENT_PATH)
+        echo ::add-mask::$DEVICE_MODEL_NAME
+        echo DEVICE_MODEL_NAME="$DEVICE_MODEL_NAME" >> $GITHUB_ENV
+
+        DEVICE_TESTER_EMAIL=$(jq -r '.inputs.device_tester_email' $GITHUB_EVENT_PATH)
+        echo ::add-mask::$DEVICE_TESTER_EMAIL
+        echo DEVICE_TESTER_EMAIL="$DEVICE_TESTER_EMAIL" >> $GITHUB_ENV
+
     - uses: actions/checkout@v3
 
     - name: Install Fastlane (via ruby and Bundler) used for managing code signing files 
@@ -33,7 +55,7 @@ jobs:
 
     - name: Register new iOS device to company's Apple Developer account 
       # runs function inside of fastlane/Fastfile      
-      run: bundle exec fastlane register_new_ios_device ios_device_udid:"${{ inputs.ios_device_udid }}" device_tester_email:"${{ inputs.device_tester_email }}" device_model_name:"${{ inputs.device_model_name }}"
+      run: bundle exec fastlane register_new_ios_device ios_device_udid:"$IOS_DEVICE_UDID" device_tester_email:"$DEVICE_TESTER_EMAIL" device_model_name:"$DEVICE_MODEL_NAME"
 
     # Apple requires that code signing files get re-created after adding a new test device to Developer account in order for new app builds to be installable by this new iOS device. 
     - name: Recrete code signing files to include new test device
