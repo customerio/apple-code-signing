@@ -19,10 +19,17 @@ on:
         required: true
         type: string
 
+# Secrets required on github repository to run this workflow. 
+# View CI_SETUP.md doc on how to find the values for these secrets. 
+env:
+  GOOGLE_CLOUD_AUTH_FILE_CONTENTS_B64: ${{ secrets.GOOGLE_CLOUD_AUTH_FILE_CONTENTS_B64 }}  
+  APP_STORE_CONNECT_API_KEY_CONTENT_B64: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT_B64 }}
+
 jobs:
   register-new-device:
     runs-on: macos-latest
     steps:
+    # To try and keep inputs hidden from CI logs. 
     - name: Create secret environment variables from inputs 
       run: |
         IOS_DEVICE_UDID=$(jq -r '.inputs.ios_device_udid' $GITHUB_EVENT_PATH)

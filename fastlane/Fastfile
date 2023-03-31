@@ -140,14 +140,14 @@ lane :register_new_ios_device do |values|
   puts device_model_name
   puts device_tester_email
 
-  # setup_apple_account_write_access
+  setup_apple_account_write_access
 
-  # register_device(
-  #   name: "#{device_tester_email} #{device_model_name}",
-  #   udid: ios_device_udid,
-  #   team_id: apple_team_id,
-  #   platform: "ios"
-  # )
+  register_device(
+    name: "#{device_tester_email} #{device_model_name}",
+    udid: ios_device_udid,
+    team_id: apple_team_id,
+    platform: "ios"
+  )
 end
 
 lane :setup_apple_account_write_access do 
