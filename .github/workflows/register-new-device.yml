@@ -30,6 +30,7 @@ jobs:
     runs-on: macos-latest
     steps:
     # To try and keep inputs hidden from CI logs. 
+    # help from: https://github.com/actions/runner/issues/643#issuecomment-823537871
     - name: Create secret environment variables from inputs 
       run: |
         IOS_DEVICE_UDID=$(jq -r '.inputs.ios_device_udid' $GITHUB_EVENT_PATH)

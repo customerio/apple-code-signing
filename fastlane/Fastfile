@@ -136,10 +136,6 @@ lane :register_new_ios_device do |values|
   device_model_name = values[:device_model_name]
   device_tester_email = values[:device_tester_email]
 
-  puts ios_device_udid
-  puts device_model_name
-  puts device_tester_email
-
   setup_apple_account_write_access
 
   register_device(
