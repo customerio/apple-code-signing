@@ -69,6 +69,11 @@ lane :create_all_code_signing_files do |values|
       type: 'development',
       app_identifier: app_identifier,
       readonly: false,
+      # force re-create code signing files each time this function is run. 
+      # Sometimes you want to force (such as when a new iOS device is registered to apple developer account).
+      # But it's also the default as a precaution to fix issues that might be happening with the team. 
+      # If we encounter problems with using this, we can make force dynamic or, use other force options such as force_for_new_devices
+      force: true, 
       team_id: apple_team_id,      
       storage_mode: sync_code_signing_storage_mode,
       google_cloud_bucket_name: sync_code_signing_google_cloud_bucket_name,
@@ -81,6 +86,7 @@ lane :create_all_code_signing_files do |values|
       type: 'adhoc',      
       app_identifier: app_identifier,
       readonly: false,
+      force: true,
       team_id: apple_team_id,
       storage_mode: sync_code_signing_storage_mode,
       google_cloud_bucket_name: sync_code_signing_google_cloud_bucket_name,
@@ -124,6 +130,21 @@ lane :download_development_code_signing do |values|
     google_cloud_project_id: "remote-habits"
   )
 end 
+
+lane :register_new_ios_device do |values|
+  ios_device_udid = values[:ios_device_udid]
+  device_model_name = values[:device_model_name]
+  device_tester_email = values[:device_tester_email]
+
+  setup_apple_account_write_access
+
+  register_device(
+    name: "#{device_tester_email} #{device_model_name}",
+    udid: ios_device_udid,
+    team_id: apple_team_id,
+    platform: "ios"
+  )
+end
 
 lane :setup_apple_account_write_access do 
   # authenticate with Apple developer account via App Store Connect API 
