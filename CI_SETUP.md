@@ -43,7 +43,7 @@ Follow [these docs](https://docs.fastlane.tools/app-store-connect-api/) for inst
 {
   "key_id": "D383SF739",
   "issuer_id": "6053b7fe-68a8-4acb-89be-165aa6465141",
-  "key": "-----BEGIN PRIVATE KEY-----\nMIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHknlhdlYdLu\n-----END PRIVATE KEY-----",
+  "key": "MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHknlhdlYdLu",
   "in_house": false
 }
 ```
