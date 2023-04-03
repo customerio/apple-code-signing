@@ -40,9 +40,9 @@ jobs:
         ruby-version: '3.0' 
         bundler-cache: true # runs 'bundle install' and caches installed gems automatically
 
-    - name: Register new iOS device to company's Apple Developer account 
+    - name: Register new iOS device to company Apple Developer account 
       # runs function inside of fastlane/Fastfile      
-      run: bundle exec fastlane register_new_ios_device ios_device_udid:"$IOS_DEVICE_UDID" device_tester_email:"$DEVICE_TESTER_EMAIL" device_model_name:"$DEVICE_MODEL_NAME"
+      run: bundle exec fastlane register_new_ios_device ios_device_udid:"${{ inputs.ios_device_udid }}" device_tester_email:"${{ inputs.device_tester_email }}" device_model_name:"${{ inputs.device_model_name }}"
 
     # Apple requires that code signing files get re-created after adding a new test device to Developer account in order for new app builds to be installable by this new iOS device. 
     - name: Recrete code signing files to include new test device
