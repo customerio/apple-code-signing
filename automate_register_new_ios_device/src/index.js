@@ -6,7 +6,7 @@ const http = require("node-fetch");
 // This function gets called automatically by Firebase when a new test device is added to App Distribution for this Firebase Project. 
 // To automate adding this new iOS device to our company's Apple Developer account, we will trigger the CI server for this GitHub repository which is setup 
 // to automate registering new devices, building iOS apps, and re-create code signing. 
-exports.registerNewDeviceAdded = onNewTesterIosDevicePublished(async (event) => {
+exports.registerNewDeviceAdded = onNewTesterIosDevicePublished({secrets: ["GITHUB_API_KEY_TRIGGER_CI_SERVER_REGISTER_NEW_TOKEN"]}, async (event) => {
   const appId = event.appId;
   const {
     testerDeviceIdentifier,
@@ -17,7 +17,7 @@ exports.registerNewDeviceAdded = onNewTesterIosDevicePublished(async (event) => 
   const githubApiKeyToTriggerCIServer = process.env.GITHUB_API_KEY_TRIGGER_CI_SERVER_REGISTER_NEW_TOKEN;
 
   if (!githubApiKeyToTriggerCIServer) {
-    throw new Error(`Forgot to set GITHUB_API_KEY_TRIGGER_CI_SERVER_REGISTER_NEW_TOKEN environment variable to authenticate with GitHub to run CI server`);
+    throw new Error(`Forgot to set GITHUB_API_KEY_TRIGGER_CI_SERVER_REGISTER_NEW_TOKEN secret to authenticate with GitHub to run CI server. Add a value for this secret, then try running again. https://firebase.google.com/docs/functions/config-env#create-secret`);
   }
   
   // https://docs.github.com/en/rest/actions/workflows?apiVersion=2022-11-28#create-a-workflow-dispatch-event
