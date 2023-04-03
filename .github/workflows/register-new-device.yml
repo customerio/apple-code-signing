@@ -27,23 +27,10 @@ env:
 
 jobs:
   register-new-device:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
-    # To try and keep inputs hidden from CI logs. 
-    # help from: https://github.com/actions/runner/issues/643#issuecomment-823537871
-    - name: Create secret environment variables from inputs 
-      run: |
-        IOS_DEVICE_UDID=$(jq -r '.inputs.ios_device_udid' $GITHUB_EVENT_PATH)
-        echo ::add-mask::$IOS_DEVICE_UDID
-        echo IOS_DEVICE_UDID="$IOS_DEVICE_UDID" >> $GITHUB_ENV
-
-        DEVICE_MODEL_NAME=$(jq -r '.inputs.device_model_name' $GITHUB_EVENT_PATH)
-        echo ::add-mask::$DEVICE_MODEL_NAME
-        echo DEVICE_MODEL_NAME="$DEVICE_MODEL_NAME" >> $GITHUB_ENV
-
-        DEVICE_TESTER_EMAIL=$(jq -r '.inputs.device_tester_email' $GITHUB_EVENT_PATH)
-        echo ::add-mask::$DEVICE_TESTER_EMAIL
-        echo DEVICE_TESTER_EMAIL="$DEVICE_TESTER_EMAIL" >> $GITHUB_ENV
+    - name: Hide the inputs values to keep them private in the logs when running this workflow
+      uses: levibostian/action-hide-sensitive-inputs@v1
 
     - uses: actions/checkout@v3
 
@@ -55,7 +42,7 @@ jobs:
 
     - name: Register new iOS device to company's Apple Developer account 
       # runs function inside of fastlane/Fastfile      
-      run: bundle exec fastlane register_new_ios_device ios_device_udid:"$IOS_DEVICE_UDID" device_tester_email:"$DEVICE_TESTER_EMAIL" device_model_name:"$DEVICE_MODEL_NAME"
+      run: bundle exec fastlane register_new_ios_device ios_device_udid:"${{ inputs.ios_device_udid }}" device_tester_email:"${{ inputs.device_tester_email }}" device_model_name:"${{ inputs.device_model_name }}"
 
     # Apple requires that code signing files get re-created after adding a new test device to Developer account in order for new app builds to be installable by this new iOS device. 
     - name: Recrete code signing files to include new test device
