@@ -159,7 +159,16 @@ lane :download_ci_code_signing_files do |values|
   setup_google_bucket_access(
     environment_variable_key: "GOOGLE_CLOUD_MATCH_READONLY_SERVICE_ACCOUNT_B64"
   )
-  
+
+  sync_code_signing(
+    type: "development",
+    readonly: true,
+    team_id: apple_team_id,
+    storage_mode: sync_code_signing_storage_mode,
+    google_cloud_bucket_name: sync_code_signing_google_cloud_bucket_name,
+    google_cloud_project_id: sync_code_signing_google_cloud_project_id,
+    google_cloud_keys_file: google_cloud_keys_file_path
+  )  
   sync_code_signing(
     type: "adhoc",
     readonly: true,
