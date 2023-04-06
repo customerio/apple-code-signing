@@ -22,7 +22,7 @@ on:
 # Secrets required on github repository to run this workflow. 
 # View CI_SETUP.md doc on how to find the values for these secrets. 
 env:
-  GOOGLE_CLOUD_AUTH_FILE_CONTENTS_B64: ${{ secrets.GOOGLE_CLOUD_AUTH_FILE_CONTENTS_B64 }}  
+  GOOGLE_CLOUD_MATCH_WRITE_SERVICE_ACCOUNT_B64: ${{ secrets.GOOGLE_CLOUD_MATCH_WRITE_SERVICE_ACCOUNT_B64 }}  
   APP_STORE_CONNECT_API_KEY_CONTENT_B64: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT_B64 }}
 
 jobs:

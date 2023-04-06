@@ -87,9 +87,9 @@ You should see the message `All required keys, certificates and provisioning pro
 # Import reusable functions that can used by all iOS apps in the team 
 # https://docs.fastlane.tools/actions/import_from_git/
 import_from_git(
-  url: "git@github.com:customerio/apple-code-signing.git", 
+  url: "https://github.com/customerio/apple-code-signing.git", 
   branch: "main", 
-  path: "fastlane-development-codesigning/Fastfile"
+  path: "fastlane/Fastfile"
 )
 ```
 

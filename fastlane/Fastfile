@@ -6,7 +6,8 @@ require 'securerandom'
 
 # Constants used throughout file to configure our iOS apps 
 sync_code_signing_storage_mode = "google_cloud"
-sync_code_signing_google_cloud_bucket_name = "ios_code_signing_files"
+sync_code_signing_google_cloud_bucket_name = "ios_code_signing_files" # google cloud storage bucket name where code signing files are stored 
+sync_code_signing_google_cloud_project_id = "remote-habits" # project ID of google cloud project that contains the storage bucket code signing files are stored in. 
 google_cloud_keys_file_path = "" # value gets updated when file gets executed
 apple_team_id = "2YC97BQN3N"
 # 
@@ -26,7 +27,9 @@ lane :delete_all_code_signing_files do |values|
   # We need to delete code signing from google cloud bucket and from apple developer account. 
   # Authenticate to both services. 
   setup_apple_account_write_access
-  setup_google_bucket_access
+  setup_google_bucket_access(
+    environment_variable_key: "GOOGLE_CLOUD_MATCH_WRITE_SERVICE_ACCOUNT_B64"
+  )
 
   # match_nuke is fastlane method of deleting files for code signing. 
   # Nuke deletes code signing files for *all* apps in the apple developer account. 
@@ -52,7 +55,9 @@ lane :create_all_code_signing_files do |values|
   # We need to create code signing files in apple developer account and google cloud bucket. 
   # authenticate with both services. 
   setup_apple_account_write_access
-  setup_google_bucket_access
+  setup_google_bucket_access(
+    environment_variable_key: "GOOGLE_CLOUD_MATCH_WRITE_SERVICE_ACCOUNT_B64"
+  )
 
   # Fetch all bundle identifiers. Remove, the Wildcard app if there is one. 
   # Wildcard app (bundle identier = *), we currently do not use because wildcard apps do not support all app capabilites we may use in an iOS app. 
@@ -112,6 +117,60 @@ lane :register_new_ios_device do |values|
   )
 end
 
+lane :download_development_code_signing do |values|
+  if ENV["CI"] 
+    UI.user_error!("This lane is meant to only be used for setting up the development environment of an engineer, not setup the CI server credentials")
+  end 
+
+  UI.message("Checking if you're logged into your @customer.io google account on your computer....")
+  is_developer_logged_into_google_account = system("gcloud auth application-default print-access-token")    
+  if !is_developer_logged_into_google_account 
+    error_message = 'In order to download the code signing files, you need to be logged into your @customer.io Google account on your computer. \n'\
+                    'Follow the steps for development code signing setup in the README docs: https://github.com/customerio/apple-code-signing'
+
+    UI.user_error!(error_message)
+  end 
+  
+  sync_code_signing(
+    type: "development",
+    readonly: true,
+    skip_google_cloud_account_confirmation: true,
+    team_id: apple_team_id,
+    storage_mode: sync_code_signing_storage_mode,
+    google_cloud_bucket_name: sync_code_signing_google_cloud_bucket_name,
+    google_cloud_project_id: sync_code_signing_google_cloud_project_id
+  )
+  sync_code_signing(
+    type: "adhoc",
+    readonly: true,
+    skip_google_cloud_account_confirmation: true,
+    team_id: apple_team_id,
+    storage_mode: sync_code_signing_storage_mode,
+    google_cloud_bucket_name: sync_code_signing_google_cloud_bucket_name,
+    google_cloud_project_id: sync_code_signing_google_cloud_project_id
+  )
+end 
+
+lane :download_ci_code_signing_files do |values|  
+  if !ENV["CI"] 
+    UI.user_error!("This lane is meant to only be used for setting up code signing on a CI server, not the development environment of an engineer")
+  end 
+
+  setup_google_bucket_access(
+    environment_variable_key: "GOOGLE_CLOUD_MATCH_READONLY_SERVICE_ACCOUNT_B64"
+  )
+  
+  sync_code_signing(
+    type: "adhoc",
+    readonly: true,
+    team_id: apple_team_id,
+    storage_mode: sync_code_signing_storage_mode,
+    google_cloud_bucket_name: sync_code_signing_google_cloud_bucket_name,
+    google_cloud_project_id: sync_code_signing_google_cloud_project_id,
+    google_cloud_keys_file: google_cloud_keys_file_path
+  )
+end 
+
 lane :setup_apple_account_write_access do 
   # authenticate with Apple developer account via App Store Connect API 
   # function allows passing in a base64 encoded string. Makes setup easier as you just need to set an (secret) environment variable to authenticate. 
@@ -135,10 +194,10 @@ lane :setup_apple_account_write_access do
   )
 end 
 
-lane :setup_google_bucket_access do
-  # Authenticate with Google Cloud account to have read/write access to file storage bucket where code signing files exist
-  # Create a temporary file on the file system with contents of base64 decoded string. Makes setup easier as you just need to set an (secret) environment variable to authenticate. 
-  environment_variable_key = "GOOGLE_CLOUD_AUTH_FILE_CONTENTS_B64"
+# Authenticate with Google Cloud account to have read/write access to file storage bucket where code signing files exist
+# Create a temporary file on the file system with contents of base64 decoded string. Makes setup easier as you just need to set an (secret) environment variable to authenticate. 
+lane :setup_google_bucket_access do |values|
+  environment_variable_key = values[:environment_variable_key]
 
   base64encoded_gc_keys_file = ENV[environment_variable_key]
   if base64encoded_gc_keys_file.nil?

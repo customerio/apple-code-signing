@@ -22,7 +22,7 @@ Let's say that you saved this `.json` file to `/tmp/gc_keys.json` on your comput
 
 [Create a secret for GitHub Actions in the GitHub repository](https://docs.github.com/en/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-a-repository). 
 
-The key for the secret is `GOOGLE_CLOUD_AUTH_FILE_CONTENTS_B64`. 
+The key for the secret is `GOOGLE_CLOUD_MATCH_WRITE_SERVICE_ACCOUNT_B64`. 
 Get the value for the secret from running this command: `cat /tmp/gc_keys.json | base64`
 
 ### Authenticate with Apple Developer Account
