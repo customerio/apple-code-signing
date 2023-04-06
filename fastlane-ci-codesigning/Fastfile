@@ -1,5 +1,3 @@
-import "../fastlane/Fastfile" # to get access to Google bucket functions 
-
 # Constants used throughout file to configure our iOS apps 
 sync_code_signing_storage_mode = "google_cloud"
 sync_code_signing_google_cloud_bucket_name = "ios_code_signing_files"
@@ -34,3 +32,27 @@ lane :download_code_signing_files do |values|
   )
 end 
 
+# copy/pasted from ../fastlane/Fastfile
+# was using `import ../` but it caused an infinite loop for files that tried to use it. 
+# Will refactor the project to remove copy/paste after we can confirm this is all working. 
+lane :setup_google_bucket_access do
+  # Authenticate with Google Cloud account to have read/write access to file storage bucket where code signing files exist
+  # Create a temporary file on the file system with contents of base64 decoded string. Makes setup easier as you just need to set an (secret) environment variable to authenticate. 
+  environment_variable_key = "GOOGLE_CLOUD_MATCH_READONLY_SERVICE_ACCOUNT_B64"
+
+  base64encoded_gc_keys_file = ENV[environment_variable_key]
+  if base64encoded_gc_keys_file.nil?
+    UI.user_error!("Script needs to authenticate with the Google API, but the environment variable #{environment_variable_key} has not been set.")
+  end   
+
+  random_string = SecureRandom.hex
+  random_directory_save_gckeys_file = "/tmp/#{random_string}/"
+  gc_keys_file_location = "#{random_directory_save_gckeys_file}gc_keys.json"
+
+  UI.message("gc_keys.json file for storage auth stored at: #{gc_keys_file_location}")
+
+  FileUtils.mkdir_p(random_directory_save_gckeys_file)
+  File.open(gc_keys_file_location, 'w') { |file| file.write(Base64.decode64(base64encoded_gc_keys_file)) }  
+
+  google_cloud_keys_file_path = gc_keys_file_location
+end 
