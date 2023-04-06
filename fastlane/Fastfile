@@ -6,7 +6,7 @@ require 'securerandom'
 
 # Constants used throughout file to configure our iOS apps 
 sync_code_signing_storage_mode = "google_cloud"
-sync_code_signing_google_cloud_bucket_name = "remote-habits-ios-signing"
+sync_code_signing_google_cloud_bucket_name = "ios_code_signing_files"
 google_cloud_keys_file_path = "" # value gets updated when file gets executed
 apple_team_id = "2YC97BQN3N"
 # 
