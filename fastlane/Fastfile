@@ -26,7 +26,7 @@ lane :delete_all_code_signing_files do |values|
   # We need to delete code signing from google cloud bucket and from apple developer account. 
   # Authenticate to both services. 
   setup_apple_account_write_access
-  setup_google_bucket_write_access
+  setup_google_bucket_access
 
   # match_nuke is fastlane method of deleting files for code signing. 
   # Nuke deletes code signing files for *all* apps in the apple developer account. 
@@ -52,7 +52,7 @@ lane :create_all_code_signing_files do |values|
   # We need to create code signing files in apple developer account and google cloud bucket. 
   # authenticate with both services. 
   setup_apple_account_write_access
-  setup_google_bucket_write_access
+  setup_google_bucket_access
 
   # Fetch all bundle identifiers. Remove, the Wildcard app if there is one. 
   # Wildcard app (bundle identier = *), we currently do not use because wildcard apps do not support all app capabilites we may use in an iOS app. 
@@ -135,7 +135,7 @@ lane :setup_apple_account_write_access do
   )
 end 
 
-lane :setup_google_bucket_write_access do
+lane :setup_google_bucket_access do
   # Authenticate with Google Cloud account to have read/write access to file storage bucket where code signing files exist
   # Create a temporary file on the file system with contents of base64 decoded string. Makes setup easier as you just need to set an (secret) environment variable to authenticate. 
   environment_variable_key = "GOOGLE_CLOUD_AUTH_FILE_CONTENTS_B64"

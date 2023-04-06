@@ -1,0 +1,36 @@
+import "../fastlane/Fastfile" # to get access to Google bucket functions 
+
+# Constants used throughout file to configure our iOS apps 
+sync_code_signing_storage_mode = "google_cloud"
+sync_code_signing_google_cloud_bucket_name = "ios_code_signing_files"
+sync_code_signing_google_cloud_project_id = "remote-habits"
+apple_team_id = "2YC97BQN3N"
+# 
+
+lane :download_code_signing_files do |values|
+  if !ENV["CI"] 
+    UI.user_error!("This lane is meant to only be used for setting up code signing on a CI server, not the development environment of an engineer")
+  end 
+
+  setup_google_bucket_access
+  
+  sync_code_signing(
+    type: "development",
+    readonly: true,
+    skip_google_cloud_account_confirmation: true,
+    team_id: apple_team_id,
+    storage_mode: sync_code_signing_storage_mode,
+    google_cloud_bucket_name: sync_code_signing_google_cloud_bucket_name,
+    google_cloud_project_id: sync_code_signing_google_cloud_project_id
+  )
+  sync_code_signing(
+    type: "adhoc",
+    readonly: true,
+    skip_google_cloud_account_confirmation: true,
+    team_id: apple_team_id,
+    storage_mode: sync_code_signing_storage_mode,
+    google_cloud_bucket_name: sync_code_signing_google_cloud_bucket_name,
+    google_cloud_project_id: sync_code_signing_google_cloud_project_id
+  )
+end 
+
