@@ -89,7 +89,7 @@ You should see the message `All required keys, certificates and provisioning pro
 import_from_git(
   url: "git@github.com:customerio/apple-code-signing.git", 
   branch: "main", 
-  path: "fastlane/Fastfile"
+  path: "fastlane-development-codesigning/Fastfile"
 )
 ```
 
