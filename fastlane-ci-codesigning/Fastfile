@@ -2,6 +2,7 @@
 sync_code_signing_storage_mode = "google_cloud"
 sync_code_signing_google_cloud_bucket_name = "ios_code_signing_files"
 sync_code_signing_google_cloud_project_id = "remote-habits"
+google_cloud_keys_file_path = ""
 apple_team_id = "2YC97BQN3N"
 # 
 
@@ -15,20 +16,20 @@ lane :download_code_signing_files do |values|
   sync_code_signing(
     type: "development",
     readonly: true,
-    skip_google_cloud_account_confirmation: true,
     team_id: apple_team_id,
     storage_mode: sync_code_signing_storage_mode,
     google_cloud_bucket_name: sync_code_signing_google_cloud_bucket_name,
-    google_cloud_project_id: sync_code_signing_google_cloud_project_id
+    google_cloud_project_id: sync_code_signing_google_cloud_project_id,
+    google_cloud_keys_file: google_cloud_keys_file_path
   )
   sync_code_signing(
     type: "adhoc",
     readonly: true,
-    skip_google_cloud_account_confirmation: true,
     team_id: apple_team_id,
     storage_mode: sync_code_signing_storage_mode,
     google_cloud_bucket_name: sync_code_signing_google_cloud_bucket_name,
-    google_cloud_project_id: sync_code_signing_google_cloud_project_id
+    google_cloud_project_id: sync_code_signing_google_cloud_project_id,
+    google_cloud_keys_file: google_cloud_keys_file_path
   )
 end 
 
