@@ -8,6 +8,7 @@ This project attempts to solve all problems on our team in regards to iOS code s
 2. **[Download code signing files to your development computer to be able to compile an iOS app](#development-code-signing)** - The goal is that you can run 1 command and then be able to compile an iOS app in Xcode.
 3. **[Automate expired code signing files](#maintenance-of-code-signing-files)** - All iOS code signing files expire. When they do expire, you are no longer able to compile the iOS app until those files get re-created. To get ahead of this, this project has automated maintenance scripts that run periodically to re-create code signing files so we should never experience expired code signing files.
 4. **[Prevent accidents from occurring to code signing files](#maintenance-of-code-signing-files)** - The CI server has write access to the Apple Developer account and Google Cloud Storage. All engineers have read-only access to these files. This workflow helps prevent anyone from making a change to the Apple Developer account and accidentally breaking code signing for iOS apps in the org.
+5. **[Download code signing files to CI server to be able to compile an iOS app](#ci-code-signing)** - Make it fast and easy to setup a CI server for building and signing of an iOS app. 
 
 Before we get into the specifies of this project and how it accomplishes all of these problems, here is a quick overview of the authentication process of our organization in regards to code signing files:
 
@@ -83,7 +84,7 @@ You should see the message `All required keys, certificates and provisioning pro
 
 **If you get an error** `Could not find 'download_development_code_signing'`, add this code snippet to the top of the file `fastlane/Fastfile` in your iOS project:
 
-```
+```ruby
 # Import reusable functions that can used by all iOS apps in the team 
 # https://docs.fastlane.tools/actions/import_from_git/
 import_from_git(
@@ -92,6 +93,8 @@ import_from_git(
   path: "fastlane/Fastfile"
 )
 ```
+
+> Note: This code may already be inside of the Fastfile if you setup CI server code signing already. 
 
 **If you get an error** `fastlane command not found`, install the Fastlane CLI with `gem install fastlane`.
 
@@ -166,3 +169,32 @@ Follow the instructions for [creating a new iOS app](#creating-a-new-ios-app) to
 If you have tried all of the steps above, there might be a larger problem happening with code signing files and it's easiest to delete them all and start over. 
 
 Follow the instructions in [re-creating all iOS code signing files](#automatically-scheduled-re-creating-of-all-ios-code-signing-files-to-prevent-expired-files) to *manually* run code signing files maintenance. This will have all code signing files deleted and re-created. There might have been a bad code signing file created and needs to be deleted and re-created. 
+
+# CI code signing 
+
+Do you have an iOS sample app that you want a CI server to build? Follow these steps to do just that! 
+
+* Go into the GitHub repository settings > Secrets > Actions to view the GitHub Actions secrets currently set in the repository (Here is an example URL for how to access the repository settings `https://github.com/customerio/customerio-ios/settings/secrets/actions`). 
+
+Look for a value `GOOGLE_CLOUD_MATCH_READONLY_SERVICE_ACCOUNT_B64`. If you already see that in the list of secrets, you can continue with these instructions. Otherwise, you will need to view [CI setup doc > Create read only access to Google Cloud Storage bucket for other CI servers to use](CI_SETUP.md#create-read-only-access-to-google-cloud-storage-bucket-for-other-ci-servers-to-use) to create this secret in your GitHub repository. 
+
+* At the top of the file `fastlane/Fastfile` in your iOS project, add this code: 
+
+```ruby
+# Import reusable functions that can used by all iOS apps in the team 
+# https://docs.fastlane.tools/actions/import_from_git/
+import_from_git(
+  url: "https://github.com/customerio/apple-code-signing.git", 
+  branch: "main", 
+  path: "fastlane/Fastfile"
+)
+
+before_all do |lane, options|    
+  setup_ci # This is required for a new local keychain to be created and where downloaded certificates will be stored. 
+end
+```
+
+> Note: This code may already be inside of the Fastfile if you setup development code signing already. 
+
+* Before you run the function `build_ios_app`, call `download_ci_code_signing_files`. [Here is an example Fastfile](https://github.com/customerio/customerio-ios/blob/54ef0694941e6462f0f018c98fc9a097b49ec500/Apps/fastlane/Fastfile) you can reference to make sure you added everything correctly. 
+
