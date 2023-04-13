@@ -222,5 +222,5 @@ lane :setup_google_bucket_access do |values|
   FileUtils.mkdir_p(random_directory_save_gckeys_file)
   File.open(gc_keys_file_location, 'w') { |file| file.write(Base64.decode64(base64encoded_gc_keys_file)) }  
 
-  return gc_keys_file_location
+  gc_keys_file_location # ruby doesn't use return keyword so we just put the return value variable as the last line to return it
 end 
