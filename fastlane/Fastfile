@@ -27,7 +27,7 @@ lane :delete_all_code_signing_files do |values|
   # We need to delete code signing from google cloud bucket and from apple developer account. 
   # Authenticate to both services. 
   setup_apple_account_write_access
-  setup_google_bucket_access(
+  google_cloud_keys_file_path = setup_google_bucket_access(
     environment_variable_key: "GOOGLE_CLOUD_MATCH_WRITE_SERVICE_ACCOUNT_B64"
   )
 
@@ -55,7 +55,7 @@ lane :create_all_code_signing_files do |values|
   # We need to create code signing files in apple developer account and google cloud bucket. 
   # authenticate with both services. 
   setup_apple_account_write_access
-  setup_google_bucket_access(
+  google_cloud_keys_file_path = setup_google_bucket_access(
     environment_variable_key: "GOOGLE_CLOUD_MATCH_WRITE_SERVICE_ACCOUNT_B64"
   )
 
@@ -156,7 +156,7 @@ lane :download_ci_code_signing_files do |values|
     UI.user_error!("This lane is meant to only be used for setting up code signing on a CI server, not the development environment of an engineer")
   end 
 
-  setup_google_bucket_access(
+  google_cloud_keys_file_path = setup_google_bucket_access(
     environment_variable_key: "GOOGLE_CLOUD_MATCH_READONLY_SERVICE_ACCOUNT_B64"
   )
 
@@ -222,5 +222,5 @@ lane :setup_google_bucket_access do |values|
   FileUtils.mkdir_p(random_directory_save_gckeys_file)
   File.open(gc_keys_file_location, 'w') { |file| file.write(Base64.decode64(base64encoded_gc_keys_file)) }  
 
-  google_cloud_keys_file_path = gc_keys_file_location
+  return gc_keys_file_location
 end 
