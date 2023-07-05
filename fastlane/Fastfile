@@ -34,6 +34,7 @@ lane :delete_all_code_signing_files do |values|
   # match_nuke is fastlane method of deleting files for code signing. 
   # Nuke deletes code signing files for *all* apps in the apple developer account. 
   match_nuke(
+    skip_confirmation: true, # required to execute this on CI server
     type: 'development',
     readonly: false,
     team_id: apple_team_id,
@@ -42,6 +43,7 @@ lane :delete_all_code_signing_files do |values|
     google_cloud_keys_file: google_cloud_keys_file_path
   )
   match_nuke(
+    skip_confirmation: true, # required to execute this on CI server
     type: 'adhoc',
     readonly: false,
     team_id: apple_team_id,
