@@ -15,7 +15,7 @@ jobs:
   create-code-signing-files:
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Install Fastlane (via ruby and Bundler) used for managing code signing files 
       uses: ruby/setup-ruby@v1

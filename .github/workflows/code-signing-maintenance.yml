@@ -21,7 +21,7 @@ jobs:
     name: Delete iOS code signing certificates to prepare for them expiring soon 
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Install Fastlane (via ruby and Bundler) used for managing code signing files 
       uses: ruby/setup-ruby@v1
@@ -39,7 +39,7 @@ jobs:
     # Creating of code signing files via CI server on SDK code bases is not yet done. Once it is, we can add that feature. 
 
     - name: Notify team about schedule maintenance 
-      uses: slackapi/slack-github-action@v1.18.0
+      uses: slackapi/slack-github-action@v1.24.0
       with:
         # Use block kit for format of the JSON payloads: https://app.slack.com/block-kit-builder
         payload: |
@@ -62,7 +62,7 @@ jobs:
         SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
 
     - name: Notify team deleting certificates failed. Fix issue so we can get certificates deleted before expiring. 
-      uses: slackapi/slack-github-action@v1.18.0
+      uses: slackapi/slack-github-action@v1.24.0
       if: ${{ failure() }} # only run this if any previous step failed
       with:
         # Use block kit for format of the JSON payloads: https://app.slack.com/block-kit-builder
