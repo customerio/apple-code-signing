@@ -1,7 +1,7 @@
 {
   "name": "functions",
   "scripts": {
-    "serve": "npx firebase emulators:start --only functions",
+    "dev": "npx firebase emulators:start --only functions",
     "shell": "npx firebase functions:shell",
     "start": "npm run shell",
     "deploy": "npx firebase deploy --only functions",
