@@ -47,7 +47,7 @@ jobs:
             "text": "Maintenance success notice",
             "username": "Code signing maintenance bot",
             "icon_url": "https://emojiguide.org/images/emoji/1/8z8e40kucdd1.png",
-            "channel": "#team-mobile",
+            "channel": "#squad-mobile",
             "blocks": [
               {
                 "type": "section",
@@ -71,7 +71,7 @@ jobs:
             "text": "Maintenance error notice",
             "username": "Code signing maintenance bot",
             "icon_url": "https://emojiguide.org/images/emoji/1/8z8e40kucdd1.png",
-            "channel": "#team-mobile",
+            "channel": "#squad-mobile",
             "blocks": [
               {
                 "type": "section",
