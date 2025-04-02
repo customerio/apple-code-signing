@@ -30,12 +30,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Hide the inputs values to keep them private in the logs when running this workflow
-      uses: levibostian/action-hide-sensitive-inputs@v1
+      uses: levibostian/action-hide-sensitive-inputs@80877460a95aa5e56cba23314096ef0e0a3c10c1 # v1
 
     - uses: actions/checkout@v4
 
     - name: Install Fastlane (via ruby and Bundler) used for managing code signing files 
-      uses: ruby/setup-ruby@v1
+      uses: ruby/setup-ruby@354a1ad156761f5ee2b7b13fa8e09943a5e8d252 # v1.229.0
       with:
         ruby-version: '3.0' 
         bundler-cache: true # runs 'bundle install' and caches installed gems automatically
@@ -51,7 +51,7 @@ jobs:
     # Below, we can now trigger other CI server jobs to make new builds of iOS apps so the new tester 
     # is able to download builds right now. 
     # - name: Create new build of Remote Habits for tester to be able to download right now 
-    #   uses: benc-uk/workflow-dispatch@v1
+    #   uses: benc-uk/workflow-dispatch@e2e5e9a103e331dad343f381a29e654aea3cf8fc # v1.2.4
     #   with:
     #     workflow: manual-build.yml
     #     repo: customerio/RemoteHabits-iOS
