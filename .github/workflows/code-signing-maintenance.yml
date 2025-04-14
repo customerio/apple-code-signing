@@ -24,7 +24,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Install Fastlane (via ruby and Bundler) used for managing code signing files 
-      uses: ruby/setup-ruby@354a1ad156761f5ee2b7b13fa8e09943a5e8d252 # v1.229.0
+      uses: ruby/setup-ruby@e5ac7b085f6e63d49c8973eb0c6e04d876b881f1 # v1.230.0
       with:
         ruby-version: '3.0' 
         bundler-cache: true # runs 'bundle install' and caches installed gems automatically
@@ -39,7 +39,7 @@ jobs:
     # Creating of code signing files via CI server on SDK code bases is not yet done. Once it is, we can add that feature. 
 
     - name: Notify team about schedule maintenance 
-      uses: slackapi/slack-github-action@6c661ce58804a1a20f6dc5fbee7f0381b469e001 # v1.25.0
+      uses: slackapi/slack-github-action@485a9d42d3a73031f12ec201c457e2162c45d02d # v2.0.0
       with:
         # Use block kit for format of the JSON payloads: https://app.slack.com/block-kit-builder
         payload: |
@@ -62,7 +62,7 @@ jobs:
         SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
 
     - name: Notify team deleting certificates failed. Fix issue so we can get certificates deleted before expiring. 
-      uses: slackapi/slack-github-action@6c661ce58804a1a20f6dc5fbee7f0381b469e001 # v1.25.0
+      uses: slackapi/slack-github-action@485a9d42d3a73031f12ec201c457e2162c45d02d # v2.0.0
       if: ${{ failure() }} # only run this if any previous step failed
       with:
         # Use block kit for format of the JSON payloads: https://app.slack.com/block-kit-builder
